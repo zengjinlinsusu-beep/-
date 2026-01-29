@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏数据展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .game-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .data-display {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .data-display.active {
+            display: block;
+        }
+
+        .back-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: #5568d3;
+        }
+
+        .data-section {
+            margin-bottom: 30px;
+        }
+
+        .data-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .data-item {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .data-item:hover {
+            background: #e9ecef;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 40px;
+        }
+
+        .update-time {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 游戏数据库</h1>
+
+        <div id="gameList" class="game-grid">
+            <div class="loading">正在加载游戏列表...</div>
+        </div>
+
+        <div id="dataDisplay" class="data-display">
+            <button class="back-button" onclick="showGameList()">← 返回游戏列表</button>
+            <div id="dataContent"></div>
+        </div>
+
+        <div class="update-time">
+            最后更新时间: <span id="updateTime"></span>
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据文件列表
+        const games = [
+            { name: '第五人格', file: '第五人格.json', icon: '🎭' },
+            { name: '暗区突围', file: '暗区突围.json', icon: '🔫' },
+            { name: '重返未来', file: '重返未来.json', icon: '⏰' },
+            { name: '原神', file: '原神.json', icon: '⚔️' },
+            { name: '崩坏：星穹铁道', file: '崩坏：星穹铁道.json', icon: '🚀' },
+            { name: '和平精英', file: '和平精英.json', icon: '🎯' },
+            { name: '地下城与勇士', file: '地下城与勇士.json', icon: '⚔️' },
+            { name: '英雄联盟', file: '英雄联盟.json', icon: '🏆' }
+        ];
+
+        let currentData = null;
+
+        // 显示游戏列表
+        function showGameList() {
+            document.getElementById('gameList').style.display = 'grid';
+            document.getElementById('dataDisplay').classList.remove('active');
+        }
+
+        // 加载并显示游戏数据
+        async function loadGameData(fileName) {
+            try {
+                const response = await fetch(fileName);
+                if (!response.ok) {
+                    throw new Error('无法加载数据文件');
+                }
+                const data = await response.json();
+                currentData = data;
+                displayData(fileName);
+            } catch (error) {
+                console.error('加载错误:', error);
+                document.getElementById('dataContent').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        <h2>❌ 加载失败</h2>
+                        <p>无法加载数据文件，请确保文件存在</p>
+                        <p style="color: #666; font-size: 0.9em;">错误信息: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 显示数据
+        function displayData(fileName) {
+            const gameName = fileName.replace('.json', '');
+            let html = `<h1 style="color: #333; margin-bottom: 20px;">${gameName} 数据</h1>`;
+
+            for (const [key, value] of Object.entries(currentData)) {
+                html += `
+                    <div class="data-section">
+                        <h2>${key}</h2>
+                        <div class="data-list">
+                `;
+
+                if (Array.isArray(value)) {
+                    value.forEach(item => {
+                        html += `<div class="data-item">${item}</div>`;
+                    });
+                } else {
+                    html += `<div class="data-item">${JSON.stringify(value, null, 2)}</div>`;
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('dataContent').innerHTML = html;
+            document.getElementById('gameList').style.display = 'none';
+            document.getElementById('dataDisplay').classList.add('active');
+        }
+
+        // 初始化游戏列表
+        function initGameList() {
+            const gameListHtml = games.map(game => `
+                <div class="game-card" onclick="loadGameData('${game.file}')">
+                    <div class="game-title">${game.icon} ${game.name}</div>
+                    <div class="game-info">点击查看数据 →</div>
+                </div>
+            `).join('');
+
+            document.getElementById('gameList').innerHTML = gameListHtml;
+
+            // 设置更新时间
+            document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN');
+        }
+
+        // 页面加载时初始化
+        window.onload = initGameList;
+    </script>
+</body>
+</html>
