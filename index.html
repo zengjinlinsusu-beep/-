@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏数据展示</title>
+    <title>游戏数据库</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -29,6 +29,28 @@
             margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
         }
 
         .game-grid {
@@ -76,7 +98,14 @@
             display: block;
         }
 
-        .back-button {
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .button {
             background: #667eea;
             color: white;
             border: none;
@@ -84,12 +113,22 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 1em;
-            margin-bottom: 20px;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .back-button:hover {
+        .button:hover {
             background: #5568d3;
+        }
+
+        .button-success {
+            background: #28a745;
+        }
+
+        .button-success:hover {
+            background: #218838;
         }
 
         .data-section {
@@ -101,6 +140,42 @@
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 2px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .search-section input {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .search-section input:focus {
+            border-color: #667eea;
+        }
+
+        .search-results {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .data-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
         }
 
         .data-item {
@@ -109,10 +184,16 @@
             margin: 5px 0;
             border-radius: 6px;
             border-left: 3px solid #667eea;
+            transition: background 0.2s;
         }
 
         .data-item:hover {
             background: #e9ecef;
+        }
+
+        .data-item.highlight {
+            background: #fff3cd;
+            border-left-color: #ffc107;
         }
 
         .loading {
@@ -129,18 +210,40 @@
             font-size: 0.9em;
             opacity: 0.8;
         }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎮 游戏数据库</h1>
 
+        <div class="search-box">
+            <input type="text" class="search-input" id="gameSearch" placeholder="🔍 搜索游戏名称..." oninput="filterGames()">
+        </div>
+
         <div id="gameList" class="game-grid">
             <div class="loading">正在加载游戏列表...</div>
         </div>
 
         <div id="dataDisplay" class="data-display">
-            <button class="back-button" onclick="showGameList()">← 返回游戏列表</button>
+            <div class="toolbar">
+                <button class="button" onclick="showGameList()">← 返回游戏列表</button>
+                <button class="button button-success" onclick="exportToExcel()">📊 导出Excel</button>
+                <button class="button button-success" onclick="exportToJSON()">📄 导出JSON</button>
+            </div>
+            <h1 id="currentGameTitle" style="color: #333; margin-bottom: 20px;"></h1>
+            <div class="search-section">
+                <input type="text" id="dataSearch" placeholder="🔍 在当前数据中搜索属性值..." oninput="searchInData()">
+                <div class="search-results" id="searchResults"></div>
+            </div>
             <div id="dataContent"></div>
         </div>
 
@@ -149,6 +252,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // 游戏数据文件列表
         const games = [
@@ -159,15 +263,42 @@
             { name: '崩坏：星穹铁道', file: '崩坏：星穹铁道.json', icon: '🚀' },
             { name: '和平精英', file: '和平精英.json', icon: '🎯' },
             { name: '地下城与勇士', file: '地下城与勇士.json', icon: '⚔️' },
-            { name: '英雄联盟', file: '英雄联盟.json', icon: '🏆' }
+            { name: '英雄联盟', file: '英雄联盟.json', icon: '🏆' },
+            { name: '部落冲突', file: '部落冲突.json', icon: '⚔️' },
+            { name: '炉石传说', file: '炉石传说.json', icon: '🃏' },
+            { name: '穿越火线', file: '穿越火线.json', icon: '🔫' },
+            { name: 'DNF', file: 'dnf.json', icon: '⚔️' }
         ];
 
         let currentData = null;
+        let currentGameFile = null;
+        let currentGameName = null;
+
+        // 过滤游戏
+        function filterGames() {
+            const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
+            const filteredGames = games.filter(game =>
+                game.name.toLowerCase().includes(searchTerm)
+            );
+
+            const gameListHtml = filteredGames.map(game => `
+                <div class="game-card" onclick="loadGameData('${game.file}')">
+                    <div class="game-title">${game.icon} ${game.name}</div>
+                    <div class="game-info">点击查看数据 →</div>
+                </div>
+            `).join('');
+
+            document.getElementById('gameList').innerHTML = gameListHtml ||
+                '<div style="grid-column: 1/-1; text-align: center; color: white; padding: 40px;">未找到匹配的游戏</div>';
+        }
 
         // 显示游戏列表
         function showGameList() {
             document.getElementById('gameList').style.display = 'grid';
             document.getElementById('dataDisplay').classList.remove('active');
+            currentData = null;
+            currentGameFile = null;
+            currentGameName = null;
         }
 
         // 加载并显示游戏数据
@@ -179,7 +310,9 @@
                 }
                 const data = await response.json();
                 currentData = data;
-                displayData(fileName);
+                currentGameFile = fileName;
+                currentGameName = fileName.replace('.json', '');
+                displayData();
             } catch (error) {
                 console.error('加载错误:', error);
                 document.getElementById('dataContent').innerHTML = `
@@ -193,20 +326,20 @@
         }
 
         // 显示数据
-        function displayData(fileName) {
-            const gameName = fileName.replace('.json', '');
-            let html = `<h1 style="color: #333; margin-bottom: 20px;">${gameName} 数据</h1>`;
+        function displayData() {
+            document.getElementById('currentGameTitle').textContent = currentGameName + ' 数据';
+            let html = '';
 
             for (const [key, value] of Object.entries(currentData)) {
                 html += `
                     <div class="data-section">
-                        <h2>${key}</h2>
-                        <div class="data-list">
+                        <h2>${key} <span style="font-size: 0.6em; color: #666;">(${Array.isArray(value) ? value.length : 1} 项)</span></h2>
+                        <div class="data-list" id="section-${key.replace(/\s+/g, '-')}">
                 `;
 
                 if (Array.isArray(value)) {
-                    value.forEach(item => {
-                        html += `<div class="data-item">${item}</div>`;
+                    value.forEach((item, index) => {
+                        html += `<div class="data-item" data-index="${index}">${item}</div>`;
                     });
                 } else {
                     html += `<div class="data-item">${JSON.stringify(value, null, 2)}</div>`;
@@ -221,19 +354,103 @@
             document.getElementById('dataContent').innerHTML = html;
             document.getElementById('gameList').style.display = 'none';
             document.getElementById('dataDisplay').classList.add('active');
+            document.getElementById('dataSearch').value = '';
+            document.getElementById('searchResults').textContent = '';
+        }
+
+        // 在数据中搜索
+        function searchInData() {
+            const searchTerm = document.getElementById('dataSearch').value.toLowerCase();
+            let totalMatches = 0;
+
+            for (const [key, value] of Object.entries(currentData)) {
+                const sectionElement = document.getElementById(`section-${key.replace(/\s+/g, '-')}`);
+                if (!sectionElement) continue;
+
+                const items = sectionElement.querySelectorAll('.data-item');
+                let sectionMatches = 0;
+
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (searchTerm === '') {
+                        item.classList.remove('hidden');
+                        item.classList.remove('highlight');
+                    } else if (text.includes(searchTerm)) {
+                        item.classList.remove('hidden');
+                        item.classList.add('highlight');
+                        sectionMatches++;
+                        totalMatches++;
+                    } else {
+                        item.classList.add('hidden');
+                        item.classList.remove('highlight');
+                    }
+                });
+            }
+
+            if (searchTerm === '') {
+                document.getElementById('searchResults').textContent = '';
+            } else {
+                document.getElementById('searchResults').textContent =
+                    totalMatches > 0 ? `✅ 找到 ${totalMatches} 个匹配项` : '❌ 未找到匹配项';
+            }
+        }
+
+        // 导出为Excel
+        function exportToExcel() {
+            if (!currentData) return;
+
+            // 找出最长的数组
+            const maxLength = Math.max(...Object.values(currentData).map(arr => Array.isArray(arr) ? arr.length : 1));
+
+            // 创建工作簿数据
+            const wbData = {};
+
+            for (const [key, value] of Object.entries(currentData)) {
+                if (Array.isArray(value)) {
+                    wbData[key] = [...value];
+                    // 填充空值以对齐
+                    while (wbData[key].length < maxLength) {
+                        wbData[key].push('');
+                    }
+                } else {
+                    wbData[key] = [value];
+                    while (wbData[key].length < maxLength) {
+                        wbData[key].push('');
+                    }
+                }
+            }
+
+            // 创建工作表
+            const ws = XLSX.utils.json_to_sheet([wbData], { skipHeader: true });
+
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '游戏数据');
+
+            // 导出文件
+            XLSX.writeFile(wb, `${currentGameName}.xlsx`);
+        }
+
+        // 导出为JSON
+        function exportToJSON() {
+            if (!currentData) return;
+
+            const jsonStr = JSON.stringify(currentData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentGameName}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // 初始化游戏列表
         function initGameList() {
-            const gameListHtml = games.map(game => `
-                <div class="game-card" onclick="loadGameData('${game.file}')">
-                    <div class="game-title">${game.icon} ${game.name}</div>
-                    <div class="game-info">点击查看数据 →</div>
-                </div>
-            `).join('');
-
-            document.getElementById('gameList').innerHTML = gameListHtml;
-
+            filterGames();
             // 设置更新时间
             document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN');
         }
