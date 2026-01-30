@@ -404,36 +404,39 @@
         function exportToExcel() {
             if (!currentData) return;
 
-            // 找出最长的数组
+            // 创建工作表数据，行头为key，值为列数据
+            const wsData = [];
+
+            // 添加表头（第一行）
+            const headers = Object.keys(currentData);
+            wsData.push(headers);
+
+            // 找出最长的数组长度
             const maxLength = Math.max(...Object.values(currentData).map(arr => Array.isArray(arr) ? arr.length : 1));
 
-            // 创建工作簿数据
-            const wbData = {};
-
-            for (const [key, value] of Object.entries(currentData)) {
-                if (Array.isArray(value)) {
-                    wbData[key] = [...value];
-                    // 填充空值以对齐
-                    while (wbData[key].length < maxLength) {
-                        wbData[key].push('');
+            // 转置数据：每个字段作为一列
+            for (let i = 0; i < maxLength; i++) {
+                const row = {};
+                headers.forEach((header, index) => {
+                    const value = currentData[header];
+                    if (Array.isArray(value)) {
+                        row[header] = value[i] || '';
+                    } else {
+                        row[header] = i === 0 ? value : '';
                     }
-                } else {
-                    wbData[key] = [value];
-                    while (wbData[key].length < maxLength) {
-                        wbData[key].push('');
-                    }
-                }
+                });
+                wsData.push(row);
             }
 
             // 创建工作表
-            const ws = XLSX.utils.json_to_sheet([wbData], { skipHeader: true });
+            const ws = XLSX.utils.json_to_sheet(wsData);
 
             // 创建工作簿
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '游戏数据');
 
             // 导出文件
-            XLSX.writeFile(wb, `${currentGameName}.xlsx`);
+            XLSLS.writeFile(wb, `${currentGameName}.xlsx`);
         }
 
         // 导出为JSON
