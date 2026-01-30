@@ -219,6 +219,80 @@
         .hidden {
             display: none !important;
         }
+
+        /* 更新日志样式 */
+        .update-log {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .update-log h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .update-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .update-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .update-game {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .update-time {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .update-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .update-tag {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .update-tag-key {
+            font-weight: bold;
+        }
+
+        .no-updates {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
     </style>
 </head>
 <body>
@@ -227,6 +301,14 @@
 
         <div class="search-box">
             <input type="text" class="search-input" id="gameSearch" placeholder="🔍 搜索游戏名称..." oninput="filterGames()">
+        </div>
+
+        <!-- 更新日志区域 -->
+        <div class="update-log" id="updateLog">
+            <h2>📋 最近更新</h2>
+            <div id="updateLogContent">
+                <div class="no-updates">正在加载更新日志...</div>
+            </div>
         </div>
 
         <div id="gameList" class="game-grid">
@@ -456,9 +538,61 @@
             URL.revokeObjectURL(url);
         }
 
+        // 加载更新日志
+        async function loadUpdateLog() {
+            try {
+                const response = await fetch('updates.json');
+                if (!response.ok) {
+                    throw new Error('无法加载更新日志');
+                }
+                const updates = await response.json();
+                displayUpdateLog(updates);
+            } catch (error) {
+                console.error('加载更新日志失败:', error);
+                document.getElementById('updateLogContent').innerHTML =
+                    '<div class="no-updates">暂无更新记录</div>';
+            }
+        }
+
+        // 显示更新日志
+        function displayUpdateLog(updates) {
+            if (!updates || updates.length === 0) {
+                document.getElementById('updateLogContent').innerHTML =
+                    '<div class="no-updates">暂无更新记录</div>';
+                return;
+            }
+
+            // 只显示最近10条更新
+            const recentUpdates = updates.slice(0, 10);
+
+            const html = recentUpdates.map(update => {
+                const updateItems = Object.entries(update.updates).map(([key, value]) => `
+                    <div class="update-tag">
+                        <span class="update-tag-key">${key}:</span>
+                        <span>${value}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="update-item">
+                        <div class="update-item-header">
+                            <span class="update-game">🎮 ${update.game}</span>
+                            <span class="update-time">🕒 ${update.time}</span>
+                        </div>
+                        <div class="update-content">
+                            ${updateItems}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('updateLogContent').innerHTML = html;
+        }
+
         // 初始化游戏列表
         function initGameList() {
             loadGamesList();
+            loadUpdateLog(); // 加载更新日志
         }
 
         // 页面加载时初始化
