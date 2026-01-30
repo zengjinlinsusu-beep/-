@@ -404,7 +404,7 @@
         function exportToExcel() {
             if (!currentData) return;
 
-            // 创建工作表数据，行头为key，值为列数据
+            // 创建工作表数据（数组数组格式）
             const wsData = [];
 
             // 添加表头（第一行）
@@ -414,22 +414,22 @@
             // 找出最长的数组长度
             const maxLength = Math.max(...Object.values(currentData).map(arr => Array.isArray(arr) ? arr.length : 1));
 
-            // 转置数据：每个字段作为一列
+            // 添加数据行
             for (let i = 0; i < maxLength; i++) {
-                const row = {};
-                headers.forEach((header, index) => {
+                const row = [];
+                headers.forEach((header) => {
                     const value = currentData[header];
                     if (Array.isArray(value)) {
-                        row[header] = value[i] || '';
+                        row.push(value[i] || '');
                     } else {
-                        row[header] = i === 0 ? value : '';
+                        row.push(i === 0 ? value : '');
                     }
                 });
                 wsData.push(row);
             }
 
-            // 创建工作表
-            const ws = XLSX.utils.json_to_sheet(wsData);
+            // 创建工作表（使用 aoa_to_sheet）
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
 
             // 创建工作簿
             const wb = XLSX.utils.book_new();
