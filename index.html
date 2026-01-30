@@ -254,25 +254,30 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // 游戏数据文件列表
-        const games = [
-            { name: '第五人格', file: '第五人格.json', icon: '🎭' },
-            { name: '暗区突围', file: '暗区突围.json', icon: '🔫' },
-            { name: '重返未来', file: '重返未来.json', icon: '⏰' },
-            { name: '原神', file: '原神.json', icon: '⚔️' },
-            { name: '崩坏：星穹铁道', file: '崩坏：星穹铁道.json', icon: '🚀' },
-            { name: '和平精英', file: '和平精英.json', icon: '🎯' },
-            { name: '地下城与勇士', file: '地下城与勇士.json', icon: '⚔️' },
-            { name: '英雄联盟', file: '英雄联盟.json', icon: '🏆' },
-            { name: '部落冲突', file: '部落冲突.json', icon: '⚔️' },
-            { name: '炉石传说', file: '炉石传说.json', icon: '🃏' },
-            { name: '穿越火线', file: '穿越火线.json', icon: '🔫' },
-            { name: 'DNF', file: 'dnf.json', icon: '⚔️' }
-        ];
+        // 游戏数据列表（将从 games.json 加载）
+        let games = [];
 
         let currentData = null;
         let currentGameFile = null;
         let currentGameName = null;
+
+        // 加载游戏列表
+        async function loadGamesList() {
+            try {
+                const response = await fetch('games.json');
+                if (!response.ok) {
+                    throw new Error('无法加载游戏列表');
+                }
+                games = await response.json();
+                filterGames();
+                document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN');
+            } catch (error) {
+                console.error('加载游戏列表失败:', error);
+                document.getElementById('gameList').innerHTML =
+                    '<div style="grid-column: 1/-1; text-align: center; color: white; padding: 40px;">' +
+                    '❌ 无法加载游戏列表<br>请确保 games.json 文件存在</div>';
+            }
+        }
 
         // 过滤游戏
         function filterGames() {
@@ -450,9 +455,7 @@
 
         // 初始化游戏列表
         function initGameList() {
-            filterGames();
-            // 设置更新时间
-            document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN');
+            loadGamesList();
         }
 
         // 页面加载时初始化

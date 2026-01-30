@@ -1,0 +1,342 @@
+[
+  {
+    "name": "dnf",
+    "file": "dnf.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "PC暗区突围",
+    "file": "PC暗区突围.json",
+    "icon": "🔫"
+  },
+  {
+    "name": "PC永劫无间",
+    "file": "PC永劫无间.json",
+    "icon": "⚔️"
+  },
+  {
+    "name": "PUBG绝地求生",
+    "file": "PUBG绝地求生.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "QQ飞车",
+    "file": "QQ飞车.json",
+    "icon": "🏎️"
+  },
+  {
+    "name": "三国杀",
+    "file": "三国杀.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "三国杀十周年",
+    "file": "三国杀十周年.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "三国谋定天下",
+    "file": "三国谋定天下.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "三角洲行动",
+    "file": "三角洲行动.json",
+    "icon": "⚔️"
+  },
+  {
+    "name": "使命召唤",
+    "file": "使命召唤.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "元梦之星",
+    "file": "元梦之星.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "光遇",
+    "file": "光遇.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "剑与远征启程",
+    "file": "剑与远征启程.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "原神",
+    "file": "原神.json",
+    "icon": "⚔️"
+  },
+  {
+    "name": "和平精英",
+    "file": "和平精英.json",
+    "icon": "🎯"
+  },
+  {
+    "name": "天龙八部",
+    "file": "天龙八部.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "如鸢",
+    "file": "如鸢.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "尘白禁区",
+    "file": "尘白禁区.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "崩坏3",
+    "file": "崩坏3.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "崩坏星穹铁道",
+    "file": "崩坏星穹铁道.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "巅峰极速",
+    "file": "巅峰极速.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "归龙潮",
+    "file": "归龙潮.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "心动小镇",
+    "file": "心动小镇.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "忍者必须死",
+    "file": "忍者必须死.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "战双帕弥什",
+    "file": "战双帕弥什.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "手游金铲铲之战",
+    "file": "手游金铲铲之战.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "掌上无畏契约",
+    "file": "掌上无畏契约.json",
+    "icon": "🔫"
+  },
+  {
+    "name": "掌上英雄联盟PC",
+    "file": "掌上英雄联盟PC.json",
+    "icon": "🏆"
+  },
+  {
+    "name": "掌上英雄联盟手游",
+    "file": "掌上英雄联盟手游.json",
+    "icon": "🏆"
+  },
+  {
+    "name": "掌上金铲铲",
+    "file": "掌上金铲铲.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "接口采集无畏契约",
+    "file": "接口采集无畏契约.json",
+    "icon": "🔫"
+  },
+  {
+    "name": "斗罗大陆猎魂世界",
+    "file": "斗罗大陆猎魂世界.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "斗罗大陆魂师对决",
+    "file": "斗罗大陆魂师对决.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "无畏契约源能行动",
+    "file": "无畏契约源能行动.json",
+    "icon": "🔫"
+  },
+  {
+    "name": "无限暖暖",
+    "file": "无限暖暖.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "明日之后",
+    "file": "明日之后.json",
+    "icon": "🌍"
+  },
+  {
+    "name": "明日方舟",
+    "file": "明日方舟.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "星球重启",
+    "file": "星球重启.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "晶核",
+    "file": "晶核.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "暗区突围",
+    "file": "暗区突围.json",
+    "icon": "🔫"
+  },
+  {
+    "name": "极品飞车",
+    "file": "极品飞车.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "永劫无间手游",
+    "file": "永劫无间手游.json",
+    "icon": "⚔️"
+  },
+  {
+    "name": "火影忍者",
+    "file": "火影忍者.json",
+    "icon": "🍥"
+  },
+  {
+    "name": "燕云十六声",
+    "file": "燕云十六声.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "率土之滨",
+    "file": "率土之滨.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "王牌竞速",
+    "file": "王牌竞速.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "王者荣耀",
+    "file": "王者荣耀.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "球球大作战",
+    "file": "球球大作战.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "穿越火线枪战王者",
+    "file": "穿越火线枪战王者.json",
+    "icon": "🔫"
+  },
+  {
+    "name": "第五人格",
+    "file": "第五人格.json",
+    "icon": "🎭"
+  },
+  {
+    "name": "绝区零",
+    "file": "绝区零.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "绝地求生",
+    "file": "绝地求生.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "美职篮全明星",
+    "file": "美职篮全明星.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "航海王热血航线",
+    "file": "航海王热血航线.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "航海王雄心壮志",
+    "file": "航海王雄心壮志.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "萤火突击",
+    "file": "萤火突击.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "蛋仔派对",
+    "file": "蛋仔派对.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "解限机",
+    "file": "解限机.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "诛仙世界PC",
+    "file": "诛仙世界PC.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "超自然行动",
+    "file": "超自然行动.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "逆水寒",
+    "file": "逆水寒.json",
+    "icon": "⚔️"
+  },
+  {
+    "name": "造梦西游",
+    "file": "造梦西游.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "部落冲突",
+    "file": "部落冲突.json",
+    "icon": "⚔️"
+  },
+  {
+    "name": "重返未来",
+    "file": "重返未来.json",
+    "icon": "⏰"
+  },
+  {
+    "name": "阴阳师",
+    "file": "阴阳师.json",
+    "icon": "👺"
+  },
+  {
+    "name": "鸣潮",
+    "file": "鸣潮.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "黑色信标",
+    "file": "黑色信标.json",
+    "icon": "🎮"
+  },
+  {
+    "name": "龙族卡塞尔之门",
+    "file": "龙族卡塞尔之门.json",
+    "icon": "🎮"
+  }
+]
