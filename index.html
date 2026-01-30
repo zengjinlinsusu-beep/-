@@ -436,7 +436,7 @@
             XLSX.utils.book_append_sheet(wb, ws, '游戏数据');
 
             // 导出文件
-            XLSLS.writeFile(wb, `${currentGameName}.xlsx`);
+            XLSX.writeFile(wb, `${currentGameName}.xlsx`);
         }
 
         // 导出为JSON
