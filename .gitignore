@@ -26,6 +26,7 @@ desktop.ini
 *.swp
 *.swo
 *~
+.claude/
 
 # 日志文件
 *.log
