@@ -1,10 +1,61 @@
 # 游戏数据管理工具使用说明
 
-本目录包含三个用于管理游戏数据的Python脚本。
+本目录包含四个用于管理游戏数据的Python脚本。
 
 ---
 
-## 1. `add_update.py` - 批量添加更新
+## 1. `updateLogManager.py` - 更新日志管理工具 ⭐ 新增
+
+### 查看所有更新记录
+```bash
+# 查看最近10条更新
+python updateLogManager.py all
+
+# 查看最近50条更新
+python updateLogManager.py all 50
+```
+
+### 按游戏查询
+```bash
+# 查看某个游戏的所有更新记录
+python updateLogManager.py game "火影忍者"
+python updateLogManager.py game "三角洲行动"
+```
+
+### 按日期查询
+```bash
+# 查看特定日期的更新
+python updateLogManager.py date "2026-02-06"
+
+# 查看特定时间的更新
+python updateLogManager.py date "2026-02-06 16:21"
+```
+
+### 按关键词搜索
+```bash
+# 在所有更新内容中搜索关键词
+python updateLogManager.py search "暗星"
+python updateLogManager.py search "宇智波斑"
+```
+
+### 查看统计信息
+```bash
+# 查看更新日志统计（各游戏更新次数等）
+python updateLogManager.py stats
+```
+
+### 导出更新日志
+```bash
+# 导出到文本文件
+python updateLogManager.py export
+
+# 导出到指定文件
+python updateLogManager.py export my_updates.txt
+```
+
+---
+
+## 2. `add_update.py` - 批量添加更新
 
 ### 使用方法
 ```bash
@@ -23,7 +74,7 @@ python add_update.py "火影忍者" "S忍:宇智波斑「神驹佑将」" "A忍:
 
 ---
 
-## 2. `gameDataManager.py` - 完整数据管理工具
+## 3. `gameDataManager.py` - 完整数据管理工具
 
 ### 交互模式（推荐新手使用）
 ```bash
@@ -86,7 +137,7 @@ python gameDataManager.py delete 火影忍者 S忍 "要删除的角色名"
 
 ---
 
-## 3. `quick_update.py` - 快速更新脚本
+## 4. `quick_update.py` - 快速更新脚本
 
 ### 使用方法
 直接编辑 `quick_update.py` 文件底部的代码：
@@ -111,7 +162,24 @@ python quick_update.py
 
 ---
 
-## 4. 更新到GitHub
+## 5. 网站功能
+
+### 更新日志搜索和过滤
+网站首页的更新日志区域支持：
+- 🔍 **搜索**：输入游戏名称、日期或关键词进行搜索
+- 📅 **快速过滤**：
+  - "全部" - 显示所有更新记录
+  - "今天" - 显示今天的更新
+  - "最近7天" - 显示最近一周的更新
+
+### 游戏数据搜索
+- 游戏列表支持实时搜索
+- 查看游戏数据时可搜索具体属性值
+- 支持导出Excel和JSON格式
+
+---
+
+## 6. 更新到GitHub
 
 执行任何数据更新后，运行以下命令同步到GitHub：
 
@@ -135,10 +203,30 @@ deploy.bat
 ## 注意事项
 
 1. 所有脚本会自动记录更新到 `updates.json`
-2. 网站会自动显示最近10条更新记录
+2. 网站会自动显示最近10条更新记录（可通过"全部"按钮查看所有记录）
 3. 修改和删除操作不会记录到更新日志（只有添加操作会记录）
 4. 建议先使用 `list` 命令查看现有数据再进行操作
 5. 所有值会自动去重，重复添加相同值会被跳过
+6. 更新日志保留最近100条记录，超出会自动删除最早的记录
+
+---
+
+## 更新日志管理
+
+### 查询更新历史
+```bash
+# 查看某个游戏的所有更新
+python updateLogManager.py game "三角洲行动"
+
+# 查看今天的所有更新
+python updateLogManager.py date "2026-02-06"
+
+# 搜索包含特定内容的更新
+python updateLogManager.py search "暗星"
+
+# 查看统计信息
+python updateLogManager.py stats
+```
 
 ---
 
