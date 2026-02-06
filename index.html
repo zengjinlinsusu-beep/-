@@ -306,6 +306,15 @@
         <!-- 更新日志区域 -->
         <div class="update-log" id="updateLog">
             <h2>📋 最近更新</h2>
+            <div class="search-section" style="margin-bottom: 15px;">
+                <input type="text" id="updateLogSearch" placeholder="🔍 搜索游戏名称、日期或关键词..." oninput="filterUpdateLog()" style="margin-bottom: 10px;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="button" onclick="showAllUpdateLogs()" style="padding: 5px 15px; font-size: 0.9em;">全部</button>
+                    <button class="button" onclick="showTodayUpdateLogs()" style="padding: 5px 15px; font-size: 0.9em;">今天</button>
+                    <button class="button" onclick="showWeekUpdateLogs()" style="padding: 5px 15px; font-size: 0.9em;">最近7天</button>
+                </div>
+                <div class="search-results" id="updateLogSearchResults" style="margin-top: 10px;"></div>
+            </div>
             <div id="updateLogContent">
                 <div class="no-updates">正在加载更新日志...</div>
             </div>
@@ -538,6 +547,9 @@
             URL.revokeObjectURL(url);
         }
 
+        // 全局变量存储所有更新日志
+        let allUpdateLogs = [];
+
         // 加载更新日志
         async function loadUpdateLog() {
             try {
@@ -546,7 +558,8 @@
                     throw new Error('无法加载更新日志');
                 }
                 const updates = await response.json();
-                displayUpdateLog(updates);
+                allUpdateLogs = updates; // 保存到全局变量
+                displayUpdateLog(updates.slice(0, 10)); // 默认显示最近10条
             } catch (error) {
                 console.error('加载更新日志失败:', error);
                 document.getElementById('updateLogContent').innerHTML =
@@ -554,7 +567,7 @@
             }
         }
 
-        // 显示更新日志
+        // 显示更新日志（支持任意数量）
         function displayUpdateLog(updates) {
             if (!updates || updates.length === 0) {
                 document.getElementById('updateLogContent').innerHTML =
@@ -562,10 +575,7 @@
                 return;
             }
 
-            // 只显示最近10条更新
-            const recentUpdates = updates.slice(0, 10);
-
-            const html = recentUpdates.map(update => {
+            const html = updates.map(update => {
                 const updateItems = Object.entries(update.updates).map(([key, value]) => `
                     <div class="update-tag">
                         <span class="update-tag-key">${key}:</span>
@@ -587,6 +597,78 @@
             }).join('');
 
             document.getElementById('updateLogContent').innerHTML = html;
+        }
+
+        // 搜索过滤更新日志
+        function filterUpdateLog() {
+            const searchTerm = document.getElementById('updateLogSearch').value.toLowerCase();
+
+            if (!searchTerm) {
+                displayUpdateLog(allUpdateLogs.slice(0, 10));
+                document.getElementById('updateLogSearchResults').textContent = '';
+                return;
+            }
+
+            const filtered = allUpdateLogs.filter(log => {
+                // 搜索游戏名称
+                if (log.game.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+
+                // 搜索日期
+                if (log.time.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+
+                // 搜索更新内容
+                const updatesStr = JSON.stringify(log.updates).toLowerCase();
+                if (updatesStr.includes(searchTerm)) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            document.getElementById('updateLogSearchResults').textContent =
+                filtered.length > 0 ? `✅ 找到 ${filtered.length} 条匹配记录` : '❌ 未找到匹配记录';
+
+            displayUpdateLog(filtered);
+        }
+
+        // 显示所有更新日志
+        function showAllUpdateLogs() {
+            document.getElementById('updateLogSearch').value = '';
+            document.getElementById('updateLogSearchResults').textContent = '';
+            displayUpdateLog(allUpdateLogs);
+        }
+
+        // 显示今天的更新
+        function showTodayUpdateLogs() {
+            const today = new Date().toISOString().split('T')[0];
+            const filtered = allUpdateLogs.filter(log => log.time.startsWith(today));
+
+            document.getElementById('updateLogSearch').value = today;
+            document.getElementById('updateLogSearchResults').textContent =
+                `📅 今天共有 ${filtered.length} 条更新`;
+
+            displayUpdateLog(filtered);
+        }
+
+        // 显示最近7天的更新
+        function showWeekUpdateLogs() {
+            const now = new Date();
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            const filtered = allUpdateLogs.filter(log => {
+                const logDate = new Date(log.time);
+                return logDate >= weekAgo && logDate <= now;
+            });
+
+            document.getElementById('updateLogSearch').value = '';
+            document.getElementById('updateLogSearchResults').textContent =
+                `📅 最近7天共有 ${filtered.length} 条更新`;
+
+            displayUpdateLog(filtered);
         }
 
         // 初始化游戏列表
