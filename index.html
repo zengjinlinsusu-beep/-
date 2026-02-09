@@ -314,14 +314,25 @@
                     <button class="button" onclick="showWeekUpdateLogs()" style="padding: 5px 15px; font-size: 0.9em;">最近7天</button>
                 </div>
 
-                <!-- 关键词搜索 -->
-                <input type="text" id="updateLogSearch" placeholder="🔍 搜索关键词..." oninput="filterUpdateLog()" style="margin-bottom: 10px;">
-
-                <!-- 高级搜索：游戏+日期 -->
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                    <select id="gameFilter" onchange="advancedFilter()" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 0.9em;">
+                <!-- 游戏筛选（支持模糊搜索） -->
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="gameFilterInput" list="gameFilterList" placeholder="🎮 搜索游戏..." oninput="onGameFilterInput()" onchange="onGameFilterChange()" style="width: 100%; padding: 10px 15px; font-size: 1em; border: 2px solid #e0e0e0; border-radius: 6px; outline: none;">
+                    <datalist id="gameFilterList">
                         <option value="">所有游戏</option>
-                    </select>
+                    </datalist>
+                    <div id="selectedGameTag" style="display: none; margin-top: 5px;">
+                        <span class="update-tag" onclick="clearGameFilter()" style="cursor: pointer;">
+                            <span id="selectedGameName"></span>
+                            <span style="margin-left: 5px; color: #999;">✕</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 关键词搜索 -->
+                <input type="text" id="updateLogSearch" placeholder="🔍 搜索更新内容关键词..." oninput="filterUpdateLog()" style="margin-bottom: 10px;">
+
+                <!-- 日期范围筛选 -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                     <input type="date" id="dateFrom" onchange="advancedFilter()" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 0.9em;" title="开始日期">
                     <span style="color: #666;">至</span>
                     <input type="date" id="dateTo" onchange="advancedFilter()" style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 0.9em;" title="结束日期">
@@ -562,8 +573,10 @@
             URL.revokeObjectURL(url);
         }
 
-        // 全局变量存储所有更新日志
+        // 全局变量存储所有更新日志和游戏列表
         let allUpdateLogs = [];
+        let allGames = [];
+        let selectedGame = '';
 
         // 加载更新日志
         async function loadUpdateLog() {
@@ -575,11 +588,34 @@
                 const updates = await response.json();
                 allUpdateLogs = updates; // 保存到全局变量
                 displayUpdateLog(updates.slice(0, 10)); // 默认显示最近10条
-                populateGameFilter(); // 填充游戏筛选下拉列表
+                populateGameFilter(); // 填充游戏筛选列表
             } catch (error) {
                 console.error('加载更新日志失败:', error);
                 document.getElementById('updateLogContent').innerHTML =
                     '<div class="no-updates">暂无更新记录</div>';
+            }
+        }
+
+        // 填充游戏筛选列表（从games.json加载所有游戏）
+        async function populateGameFilter() {
+            try {
+                const response = await fetch('games.json');
+                if (!response.ok) {
+                    throw new Error('无法加载游戏列表');
+                }
+                const games = await response.json();
+                allGames = games.map(g => g.name).sort();
+
+                // 填充datalist
+                const dataList = document.getElementById('gameFilterList');
+                dataList.innerHTML = '<option value="">所有游戏</option>';
+                allGames.forEach(game => {
+                    const option = document.createElement('option');
+                    option.value = game;
+                    dataList.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载游戏列表失败:', error);
             }
         }
 
@@ -618,11 +654,7 @@
         // 搜索过滤更新日志
         function filterUpdateLog() {
             // 如果使用了高级筛选（游戏或日期），则调用advancedFilter
-            const gameFilter = document.getElementById('gameFilter').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-
-            if (gameFilter || dateFrom || dateTo) {
+            if (selectedGame || document.getElementById('dateFrom').value || document.getElementById('dateTo').value) {
                 advancedFilter();
                 return;
             }
@@ -664,8 +696,10 @@
 
         // 显示所有更新日志
         function showAllUpdateLogs() {
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
             document.getElementById('updateLogSearch').value = '';
-            document.getElementById('gameFilter').value = '';
             document.getElementById('dateFrom').value = '';
             document.getElementById('dateTo').value = '';
             document.getElementById('updateLogSearchResults').textContent = '';
@@ -677,8 +711,10 @@
             const today = new Date().toISOString().split('T')[0];
             const filtered = allUpdateLogs.filter(log => log.time.startsWith(today));
 
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
             document.getElementById('updateLogSearch').value = '';
-            document.getElementById('gameFilter').value = '';
             document.getElementById('dateFrom').value = today;
             document.getElementById('dateTo').value = today;
             document.getElementById('updateLogSearchResults').textContent =
@@ -698,8 +734,10 @@
                 return logDate >= weekAgo && logDate <= now;
             });
 
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
             document.getElementById('updateLogSearch').value = '';
-            document.getElementById('gameFilter').value = '';
             document.getElementById('dateFrom').value = weekAgoStr;
             document.getElementById('dateTo').value = now.toISOString().split('T')[0];
             document.getElementById('updateLogSearchResults').textContent =
@@ -708,23 +746,53 @@
             displayUpdateLog(filtered);
         }
 
-        // 填充游戏筛选下拉列表
-        function populateGameFilter() {
-            const gameSelect = document.getElementById('gameFilter');
-            const uniqueGames = [...new Set(allUpdateLogs.map(log => log.game))].sort();
+        // 游戏筛选输入处理
+        function onGameFilterInput() {
+            const input = document.getElementById('gameFilterInput').value;
+            // 实时筛选时不清除已选游戏，允许用户修改
+        }
 
-            gameSelect.innerHTML = '<option value="">所有游戏</option>';
-            uniqueGames.forEach(game => {
-                const option = document.createElement('option');
-                option.value = game;
-                option.textContent = game;
-                gameSelect.appendChild(option);
-            });
+        // 游戏筛选变更处理（用户选择或完成输入）
+        function onGameFilterChange() {
+            const input = document.getElementById('gameFilterInput').value.trim();
+
+            if (input === '' || input === '所有游戏') {
+                clearGameFilter();
+                return;
+            }
+
+            // 查找匹配的游戏
+            const matchedGame = allGames.find(g => g === input);
+
+            if (matchedGame) {
+                // 精确匹配，选中该游戏
+                selectedGame = matchedGame;
+                document.getElementById('selectedGameName').textContent = matchedGame;
+                document.getElementById('selectedGameTag').style.display = 'block';
+                advancedFilter();
+            } else {
+                // 模糊匹配
+                const filteredGames = allGames.filter(g => g.toLowerCase().includes(input.toLowerCase()));
+                if (filteredGames.length === 1) {
+                    // 只有一个匹配，自动选中
+                    selectedGame = filteredGames[0];
+                    document.getElementById('selectedGameName').textContent = filteredGames[0];
+                    document.getElementById('selectedGameTag').style.display = 'block';
+                    advancedFilter();
+                }
+            }
+        }
+
+        // 清除游戏筛选
+        function clearGameFilter() {
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
+            advancedFilter();
         }
 
         // 高级筛选（游戏+日期范围）
         function advancedFilter() {
-            const gameFilter = document.getElementById('gameFilter').value;
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
             const searchTerm = document.getElementById('updateLogSearch').value.toLowerCase();
@@ -732,8 +800,8 @@
             let filtered = allUpdateLogs;
 
             // 按游戏筛选
-            if (gameFilter) {
-                filtered = filtered.filter(log => log.game === gameFilter);
+            if (selectedGame) {
+                filtered = filtered.filter(log => log.game === selectedGame);
             }
 
             // 按日期范围筛选
@@ -761,7 +829,7 @@
 
             // 更新结果统计
             let resultText = '';
-            if (gameFilter) resultText += `🎮 ${gameFilter} `;
+            if (selectedGame) resultText += `🎮 ${selectedGame} `;
             if (dateFrom || dateTo) resultText += `📅 ${dateFrom || '...'} ~ ${dateTo || '...'} `;
             resultText += `共 ${filtered.length} 条更新`;
 
@@ -771,7 +839,9 @@
 
         // 清空高级筛选
         function clearAdvancedFilter() {
-            document.getElementById('gameFilter').value = '';
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
             document.getElementById('dateFrom').value = '';
             document.getElementById('dateTo').value = '';
             document.getElementById('updateLogSearch').value = '';
