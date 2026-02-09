@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更新日志 - 游戏数据库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-bar a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-bar a:hover {
+            color: #5568d3;
+        }
+
+        .update-log {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .update-log h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .search-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .quick-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: #5568d3;
+        }
+
+        .button-success {
+            background: #28a745;
+        }
+
+        .button-success:hover {
+            background: #218838;
+        }
+
+        input[type="text"], input[type="date"] {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus {
+            border-color: #667eea;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .filter-row > * {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .update-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .update-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .update-game {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .update-time {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .update-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .update-tag {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .update-tag-key {
+            font-weight: bold;
+        }
+
+        .no-updates {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
+        .search-results {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .selected-game-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 40px;
+        }
+
+        .stats-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 更新日志管理</h1>
+
+        <!-- 导航栏 -->
+        <div class="nav-bar">
+            <span>🎮 游戏数据库</span>
+            <a href="index.html">← 返回游戏列表</a>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalUpdates">-</div>
+                <div class="stat-label">总更新记录</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalGames">-</div>
+                <div class="stat-label">更新游戏数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="todayUpdates">-</div>
+                <div class="stat-label">今日更新</div>
+            </div>
+        </div>
+
+        <!-- 更新日志区域 -->
+        <div class="update-log">
+            <h2>📋 更新记录</h2>
+            <div class="search-section">
+                <!-- 快速过滤按钮 -->
+                <div class="quick-filters">
+                    <button class="button" onclick="showAllUpdateLogs()">全部</button>
+                    <button class="button" onclick="showTodayUpdateLogs()">今天</button>
+                    <button class="button" onclick="showWeekUpdateLogs()">最近7天</button>
+                    <button class="button button-success" onclick="exportUpdateLog()">📄 导出日志</button>
+                </div>
+
+                <!-- 游戏筛选 -->
+                <div style="margin: 15px 0;">
+                    <input type="text" id="gameFilterInput" list="gameFilterList" placeholder="🎮 搜索游戏..." oninput="onGameFilterInput()" onchange="onGameFilterChange()">
+                    <datalist id="gameFilterList"></datalist>
+                    <div id="selectedGameTag" style="display: none;"></div>
+                </div>
+
+                <!-- 关键词搜索 -->
+                <div style="margin: 10px 0;">
+                    <input type="text" id="updateLogSearch" placeholder="🔍 搜索更新内容关键词..." oninput="filterUpdateLog()">
+                </div>
+
+                <!-- 日期范围筛选 -->
+                <div class="filter-row">
+                    <input type="date" id="dateFrom" onchange="advancedFilter()" placeholder="开始日期">
+                    <span style="color: #666;">至</span>
+                    <input type="date" id="dateTo" onchange="advancedFilter()" placeholder="结束日期">
+                    <button class="button" onclick="clearAdvancedFilter()">清空筛选</button>
+                </div>
+
+                <div class="search-results" id="updateLogSearchResults"></div>
+            </div>
+            <div id="updateLogContent">
+                <div class="loading">正在加载更新日志...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // 全局变量
+        let allUpdateLogs = [];
+        let allGames = [];
+        let selectedGame = '';
+
+        // 加载数据
+        async function loadUpdateLog() {
+            try {
+                const response = await fetch('updates.json');
+                if (!response.ok) throw new Error('无法加载更新日志');
+                const updates = await response.json();
+                allUpdateLogs = updates;
+                displayUpdateLog(updates.slice(0, 20)); // 默认显示最近20条
+                updateStats();
+                populateGameFilter();
+            } catch (error) {
+                console.error('加载更新日志失败:', error);
+                document.getElementById('updateLogContent').innerHTML =
+                    '<div class="no-updates">暂无更新记录</div>';
+            }
+        }
+
+        // 填充游戏筛选列表
+        async function populateGameFilter() {
+            try {
+                const response = await fetch('games.json');
+                if (!response.ok) throw new Error('无法加载游戏列表');
+                const games = await response.json();
+                allGames = games.map(g => g.name).sort();
+
+                const dataList = document.getElementById('gameFilterList');
+                dataList.innerHTML = '<option value="">所有游戏</option>';
+                allGames.forEach(game => {
+                    const option = document.createElement('option');
+                    option.value = game;
+                    dataList.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载游戏列表失败:', error);
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById('totalUpdates').textContent = allUpdateLogs.length;
+
+            const uniqueGames = new Set(allUpdateLogs.map(log => log.game));
+            document.getElementById('totalGames').textContent = uniqueGames.size;
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = allUpdateLogs.filter(log => log.time.startsWith(today)).length;
+            document.getElementById('todayUpdates').textContent = todayCount;
+        }
+
+        // 显示更新日志
+        function displayUpdateLog(updates) {
+            if (!updates || updates.length === 0) {
+                document.getElementById('updateLogContent').innerHTML =
+                    '<div class="no-updates">暂无更新记录</div>';
+                return;
+            }
+
+            const html = updates.map(update => {
+                const updateItems = Object.entries(update.updates).map(([key, value]) => `
+                    <div class="update-tag">
+                        <span class="update-tag-key">${key}:</span>
+                        <span>${value}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="update-item">
+                        <div class="update-item-header">
+                            <span class="update-game">🎮 ${update.game}</span>
+                            <span class="update-time">🕒 ${update.time}</span>
+                        </div>
+                        <div class="update-content">
+                            ${updateItems}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('updateLogContent').innerHTML = html;
+        }
+
+        // 搜索过滤
+        function filterUpdateLog() {
+            if (selectedGame || document.getElementById('dateFrom').value || document.getElementById('dateTo').value) {
+                advancedFilter();
+                return;
+            }
+
+            const searchTerm = document.getElementById('updateLogSearch').value.toLowerCase();
+            if (!searchTerm) {
+                displayUpdateLog(allUpdateLogs.slice(0, 20));
+                document.getElementById('updateLogSearchResults').textContent = '';
+                return;
+            }
+
+            const filtered = allUpdateLogs.filter(log => {
+                if (log.game.toLowerCase().includes(searchTerm)) return true;
+                if (log.time.toLowerCase().includes(searchTerm)) return true;
+                const updatesStr = JSON.stringify(log.updates).toLowerCase();
+                if (updatesStr.includes(searchTerm)) return true;
+                return false;
+            });
+
+            document.getElementById('updateLogSearchResults').textContent =
+                filtered.length > 0 ? `✅ 找到 ${filtered.length} 条匹配记录` : '❌ 未找到匹配记录';
+            displayUpdateLog(filtered);
+        }
+
+        // 显示所有更新
+        function showAllUpdateLogs() {
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
+            document.getElementById('updateLogSearch').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('updateLogSearchResults').textContent = '';
+            displayUpdateLog(allUpdateLogs);
+        }
+
+        // 显示今天的更新
+        function showTodayUpdateLogs() {
+            const today = new Date().toISOString().split('T')[0];
+            const filtered = allUpdateLogs.filter(log => log.time.startsWith(today));
+
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
+            document.getElementById('updateLogSearch').value = '';
+            document.getElementById('dateFrom').value = today;
+            document.getElementById('dateTo').value = today;
+            document.getElementById('updateLogSearchResults').textContent =
+                `📅 今天共有 ${filtered.length} 条更新`;
+            displayUpdateLog(filtered);
+        }
+
+        // 显示最近7天的更新
+        function showWeekUpdateLogs() {
+            const now = new Date();
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const weekAgoStr = weekAgo.toISOString().split('T')[0];
+
+            const filtered = allUpdateLogs.filter(log => {
+                const logDate = new Date(log.time);
+                return logDate >= weekAgo && logDate <= now;
+            });
+
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
+            document.getElementById('updateLogSearch').value = '';
+            document.getElementById('dateFrom').value = weekAgoStr;
+            document.getElementById('dateTo').value = now.toISOString().split('T')[0];
+            document.getElementById('updateLogSearchResults').textContent =
+                `📅 最近7天共有 ${filtered.length} 条更新`;
+            displayUpdateLog(filtered);
+        }
+
+        // 游戏筛选输入处理
+        function onGameFilterInput() {}
+
+        function onGameFilterChange() {
+            const input = document.getElementById('gameFilterInput').value.trim();
+            if (input === '' || input === '所有游戏') {
+                clearGameFilter();
+                return;
+            }
+
+            const matchedGame = allGames.find(g => g === input);
+            if (matchedGame) {
+                selectedGame = matchedGame;
+                document.getElementById('selectedGameTag').innerHTML =
+                    `<span class="selected-game-tag" onclick="clearGameFilter()">${matchedGame} ✕</span>`;
+                document.getElementById('selectedGameTag').style.display = 'block';
+                advancedFilter();
+            } else {
+                const filteredGames = allGames.filter(g => g.toLowerCase().includes(input.toLowerCase()));
+                if (filteredGames.length === 1) {
+                    selectedGame = filteredGames[0];
+                    document.getElementById('selectedGameTag').innerHTML =
+                        `<span class="selected-game-tag" onclick="clearGameFilter()">${filteredGames[0]} ✕</span>`;
+                    document.getElementById('selectedGameTag').style.display = 'block';
+                    advancedFilter();
+                }
+            }
+        }
+
+        function clearGameFilter() {
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
+            advancedFilter();
+        }
+
+        // 高级筛选
+        function advancedFilter() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const searchTerm = document.getElementById('updateLogSearch').value.toLowerCase();
+
+            let filtered = allUpdateLogs;
+
+            if (selectedGame) {
+                filtered = filtered.filter(log => log.game === selectedGame);
+            }
+
+            if (dateFrom) {
+                filtered = filtered.filter(log => {
+                    const logDate = log.time.split(' ')[0];
+                    return logDate >= dateFrom;
+                });
+            }
+
+            if (dateTo) {
+                filtered = filtered.filter(log => {
+                    const logDate = log.time.split(' ')[0];
+                    return logDate <= dateTo;
+                });
+            }
+
+            if (searchTerm) {
+                filtered = filtered.filter(log => {
+                    const updatesStr = JSON.stringify(log.updates).toLowerCase();
+                    return updatesStr.includes(searchTerm);
+                });
+            }
+
+            let resultText = '';
+            if (selectedGame) resultText += `🎮 ${selectedGame} `;
+            if (dateFrom || dateTo) resultText += `📅 ${dateFrom || '...'} ~ ${dateTo || '...'} `;
+            resultText += `共 ${filtered.length} 条更新`;
+
+            document.getElementById('updateLogSearchResults').textContent = resultText;
+            displayUpdateLog(filtered);
+        }
+
+        function clearAdvancedFilter() {
+            selectedGame = '';
+            document.getElementById('gameFilterInput').value = '';
+            document.getElementById('selectedGameTag').style.display = 'none';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('updateLogSearch').value = '';
+            document.getElementById('updateLogSearchResults').textContent = '';
+            displayUpdateLog(allUpdateLogs.slice(0, 20));
+        }
+
+        // 导出更新日志
+        function exportUpdateLog() {
+            if (!allUpdateLogs.length) return;
+
+            // 创建工作表数据
+            const wsData = [['日期', '游戏', '字段', '值']];
+
+            allUpdateLogs.forEach(log => {
+                Object.entries(log.updates).forEach(([key, value]) => {
+                    wsData.push([log.time, log.game, key, value]);
+                });
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '更新日志');
+            XLSX.writeFile(wb, 'update_log.xlsx');
+        }
+
+        // 初始化
+        window.onload = loadUpdateLog;
+    </script>
+</body>
+</html>
