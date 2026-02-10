@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据管理 - 游戏数据库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-bar a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-bar a:hover {
+            color: #5568d3;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .form-help {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button:hover {
+            background: #5568d3;
+        }
+
+        .button-success {
+            background: #28a745;
+        }
+
+        .button-success:hover {
+            background: #218838;
+        }
+
+        .button-secondary {
+            background: #6c757d;
+        }
+
+        .button-secondary:hover {
+            background: #5a6268;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .preview-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .current-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .field-tag {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .command-box {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .command-box h3 {
+            color: #f92672;
+            margin-bottom: 15px;
+        }
+
+        .command-content {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 40px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            color: #155724;
+            margin-top: 15px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            color: #721c24;
+            margin-top: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1em;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ 数据管理</h1>
+
+        <!-- 导航栏 -->
+        <div class="nav-bar">
+            <span>🎮 游戏数据库管理后台</span>
+            <div>
+                <a href="index.html">游戏列表</a> |
+                <a href="updates.html">更新日志</a>
+            </div>
+        </div>
+
+        <!-- 添加/更新数据 -->
+        <div class="card">
+            <h2>📝 添加/更新游戏数据</h2>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('add')">添加数据</button>
+                <button class="tab" onclick="switchTab('batch')">批量添加</button>
+            </div>
+
+            <!-- 添加单个数据 -->
+            <div id="tab-add" class="tab-content active">
+                <div class="form-group">
+                    <label for="gameSelect">选择游戏</label>
+                    <select id="gameSelect" onchange="loadGameData()">
+                        <option value="">正在加载游戏列表...</option>
+                    </select>
+                    <div class="form-help">当前游戏的所有字段将在下方显示</div>
+                </div>
+
+                <div id="currentFieldsBox" class="hidden">
+                    <div class="form-group">
+                        <label>当前字段列表</label>
+                        <div id="currentFields" class="current-fields"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fieldName">字段名称</label>
+                    <input type="text" id="fieldName" placeholder="例如: S忍、A车、武器、皮肤等" list="existingFields">
+                    <datalist id="existingFields"></datalist>
+                    <div class="form-help">输入现有字段名或创建新字段</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fieldValue">字段值（支持多个）</label>
+                    <textarea id="fieldValue" placeholder="每行一个值，例如：&#10;新角色A&#10;新角色B&#10;新角色C"></textarea>
+                    <div class="form-help">每行输入一个值，支持一次添加多个</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="button button-success" onclick="addData()">➕ 添加数据</button>
+                    <button class="button button-secondary" onclick="clearForm()">清空表单</button>
+                </div>
+            </div>
+
+            <!-- 批量添加 -->
+            <div id="tab-batch" class="tab-content">
+                <div class="form-group">
+                    <label for="batchGameSelect">选择游戏</label>
+                    <select id="batchGameSelect" onchange="loadBatchGameData()">
+                        <option value="">正在加载游戏列表...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchData">批量数据（JSON格式）</label>
+                    <textarea id="batchData" placeholder='{
+  "S忍": "新角色A",
+  "A忍": "新角色B",
+  "皮肤": ["皮肤1", "皮肤2", "皮肤3"]
+}'></textarea>
+                    <div class="form-help">使用JSON格式，支持单个值或数组</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="button button-success" onclick="batchAddData()">📦 批量添加</button>
+                    <button class="button" onclick="loadBatchTemplate()">加载模板</button>
+                </div>
+            </div>
+
+            <!-- 预览区域 -->
+            <div id="previewBox" class="hidden">
+                <div class="preview-box">
+                    <h3>📋 更新预览</h3>
+                    <div id="previewContent" class="preview-content"></div>
+                </div>
+            </div>
+
+            <!-- 下载区域 -->
+            <div id="downloadBox" class="hidden">
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="button button-success" onclick="downloadJSON()">📥 下载更新后的JSON</button>
+                    <button class="button" onclick="downloadPythonScript()">🐍 下载Python脚本</button>
+                </div>
+            </div>
+
+            <!-- Git命令区域 -->
+            <div id="commandBox" class="hidden">
+                <div class="command-box">
+                    <h3>💻 Git提交命令</h3>
+                    <div id="commandContent" class="command-content"></div>
+                </div>
+            </div>
+
+            <!-- 消息区域 -->
+            <div id="messageBox"></div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="card">
+            <h2>📖 使用说明</h2>
+            <div style="color: #666; line-height: 1.8;">
+                <p><strong>1. 添加数据流程：</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>选择要更新的游戏</li>
+                    <li>输入字段名称（如：S忍、武器、皮肤等）</li>
+                    <li>输入要添加的值（每行一个）</li>
+                    <li>点击"添加数据"预览更新</li>
+                    <li>下载更新后的JSON文件或Python脚本</li>
+                </ul>
+
+                <p><strong>2. 更新到GitHub：</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>方法1：下载JSON文件，替换本地文件后提交</li>
+                    <li>方法2：下载Python脚本，运行后自动更新</li>
+                    <li>使用提供的Git命令提交更改</li>
+                </ul>
+
+                <p><strong>3. 注意事项：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>所有添加都会自动去重</li>
+                    <li>更新会自动记录到updates.json</li>
+                    <li>建议先预览再下载</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allGames = [];
+        let currentGameData = null;
+        let currentGameFile = null;
+        let updatedGameData = null;
+
+        // 加载游戏列表
+        async function loadGamesList() {
+            try {
+                const response = await fetch('games.json');
+                if (!response.ok) throw new Error('无法加载游戏列表');
+                const games = await response.json();
+                allGames = games;
+
+                // 更新两个下拉框
+                const options = '<option value="">请选择游戏...</option>' +
+                    games.map(g => `<option value="${g.file}">${g.icon} ${g.name}</option>`).join('');
+
+                document.getElementById('gameSelect').innerHTML = options;
+                document.getElementById('batchGameSelect').innerHTML = options;
+            } catch (error) {
+                console.error('加载游戏列表失败:', error);
+                showMessage('无法加载游戏列表', 'error');
+            }
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // 加载游戏数据
+        async function loadGameData() {
+            const gameFile = document.getElementById('gameSelect').value;
+            if (!gameFile) {
+                document.getElementById('currentFieldsBox').classList.add('hidden');
+                currentGameData = null;
+                currentGameFile = null;
+                return;
+            }
+
+            try {
+                const response = await fetch(gameFile);
+                if (!response.ok) throw new Error('无法加载数据文件');
+                const data = await response.json();
+                currentGameData = data;
+                currentGameFile = gameFile;
+
+                // 显示当前字段
+                const fields = Object.keys(data);
+                document.getElementById('currentFields').innerHTML =
+                    fields.map(f => `<span class="field-tag">${f}</span>`).join('');
+                document.getElementById('currentFieldsBox').classList.remove('hidden');
+
+                // 更新datalist
+                document.getElementById('existingFields').innerHTML =
+                    fields.map(f => `<option value="${f}">`).join('');
+            } catch (error) {
+                console.error('加载游戏数据失败:', error);
+                showMessage('无法加载游戏数据', 'error');
+            }
+        }
+
+        // 添加数据
+        function addData() {
+            if (!currentGameData || !currentGameFile) {
+                showMessage('请先选择游戏', 'error');
+                return;
+            }
+
+            const fieldName = document.getElementById('fieldName').value.trim();
+            const fieldValue = document.getElementById('fieldValue').value.trim();
+
+            if (!fieldName) {
+                showMessage('请输入字段名称', 'error');
+                return;
+            }
+
+            if (!fieldValue) {
+                showMessage('请输入字段值', 'error');
+                return;
+            }
+
+            // 复制数据
+            updatedGameData = JSON.parse(JSON.stringify(currentGameData));
+
+            // 创建字段（如果不存在）
+            if (!updatedGameData[fieldName]) {
+                updatedGameData[fieldName] = [];
+            }
+
+            // 添加值
+            const values = fieldValue.split('\n').map(v => v.trim()).filter(v => v);
+            const added = [];
+            const skipped = [];
+
+            values.forEach(v => {
+                if (!updatedGameData[fieldName].includes(v)) {
+                    updatedGameData[fieldName].push(v);
+                    added.push(v);
+                } else {
+                    skipped.push(v);
+                }
+            });
+
+            // 显示预览
+            showPreview(fieldName, added, skipped);
+            showMessage(`成功添加 ${added.length} 个值${skipped.length > 0 ? `，跳过 ${skipped.length} 个重复值` : ''}`, 'success');
+
+            // 显示下载和命令区域
+            document.getElementById('downloadBox').classList.remove('hidden');
+            document.getElementById('commandBox').classList.remove('hidden');
+
+            // 生成Git命令
+            generateCommands(fieldName, added);
+        }
+
+        // 显示预览
+        function showPreview(fieldName, added, skipped) {
+            const preview = {
+                game: currentGameFile.replace('.json', ''),
+                field: fieldName,
+                added: added,
+                skipped: skipped,
+                totalInField: updatedGameData[fieldName].length
+            };
+
+            document.getElementById('previewContent').textContent = JSON.stringify(preview, null, 2);
+            document.getElementById('previewBox').classList.remove('hidden');
+        }
+
+        // 生成Git命令
+        function generateCommands(fieldName, added) {
+            const gameName = currentGameFile.replace('.json', '');
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const valueStr = added.length === 1 ? added[0] : `${added.length}个新值`;
+
+            const command = `# 1. 下载JSON文件并替换本地文件
+# 2. 运行以下命令提交到GitHub
+
+git add ${currentGameFile} updates.json
+git commit -m "Update ${gameName}: ${fieldName} - ${valueStr}"
+git push`;
+
+            document.getElementById('commandContent').textContent = command;
+        }
+
+        // 下载JSON
+        function downloadJSON() {
+            if (!updatedGameData) return;
+
+            const jsonStr = JSON.stringify(updatedGameData, ensureUnicode, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentGameFile;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // 同时生成并下载更新日志
+            downloadUpdateLog();
+        }
+
+        // 确保中文正确显示
+        function ensureUnicode(key, value) {
+            return value;
+        }
+
+        // 下载更新日志
+        async function downloadUpdateLog() {
+            try {
+                const response = await fetch('updates.json');
+                const updates = await response.json();
+
+                const fieldName = document.getElementById('fieldName').value.trim();
+                const fieldValue = document.getElementById('fieldValue').value.trim();
+                const values = fieldValue.split('\n').map(v => v.trim()).filter(v => v);
+                const gameName = currentGameFile.replace('.json', '');
+
+                // 创建新的更新记录
+                const newUpdate = {
+                    time: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
+                    game: gameName,
+                    updates: {}
+                };
+
+                // 检查哪些值是新添加的
+                const addedValues = values.filter(v => !currentGameData[fieldName]?.includes(v));
+                if (addedValues.length > 0) {
+                    newUpdate.updates[fieldName] = addedValues.length === 1 ? addedValues[0] : `${addedValues.length}个新值`;
+                }
+
+                // 添加到更新日志开头
+                updates.unshift(newUpdate);
+
+                // 下载更新日志
+                const jsonStr = JSON.stringify(updates.slice(0, 100), ensureUnicode, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'updates.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('下载更新日志失败:', error);
+            }
+        }
+
+        // 下载Python脚本
+        function downloadPythonScript() {
+            if (!updatedGameData) return;
+
+            const fieldName = document.getElementById('fieldName').value.trim();
+            const fieldValue = document.getElementById('fieldValue').value.trim();
+            const values = fieldValue.split('\n').map(v => v.trim()).filter(v => v);
+            const addedValues = values.filter(v => !currentGameData[fieldName]?.includes(v));
+            const gameName = currentGameFile.replace('.json', '');
+
+            const script = `#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+\"\"\"
+自动更新脚本 - 生成于 ${new Date().toLocaleString('zh-CN')}
+游戏: ${gameName}
+字段: ${fieldName}
+\"\"\"
+import json
+
+def update_game_data():
+    json_file = "${currentGameFile}"
+
+    # 读取现有数据
+    try:
+        with open(json_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"[ERROR] 文件不存在: {json_file}")
+        return
+
+    # 确保字段存在
+    if "${fieldName}" not in data:
+        data["${fieldName}"] = []
+
+    # 添加新值
+    new_values = ${JSON.stringify(addedValues)}
+    added = 0
+    for value in new_values:
+        if value and value not in data["${fieldName}"]:
+            data["${fieldName}"].append(value)
+            added += 1
+            print(f"[OK] ${gameName} - ${fieldName}: {value}")
+
+    # 保存数据
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    print(f"\\n[SUCCESS] 已添加 {added} 个新值")
+
+    # 更新日志
+    try:
+        with open('updates.json', 'r', encoding='utf-8') as f:
+            updates = json.load(f)
+    except:
+        updates = []
+
+    from datetime import datetime
+    update_log = {
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "game": "${gameName}",
+        "updates": {
+            "${fieldName}": "${addedValues.length === 1 ? addedValues[0] : addedValues.length + '个新值'}"
+        }
+    }
+    updates.insert(0, update_log)
+
+    with open('updates.json', 'w', encoding='utf-8') as f:
+        json.dump(updates[:100], f, ensure_ascii=False, indent=2)
+
+    print("[SUCCESS] 更新日志已记录")
+    print("\\n请运行以下命令提交到GitHub:")
+    print('  git add ${currentGameFile} updates.json')
+    print('  git commit -m "Update ${gameName}: ${fieldName}"')
+    print("  git push")
+
+if __name__ == "__main__":
+    update_game_data()
+`;
+
+            const blob = new Blob([script], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `update_${gameName}_${fieldName}.py`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 清空表单
+        function clearForm() {
+            document.getElementById('fieldName').value = '';
+            document.getElementById('fieldValue').value = '';
+            document.getElementById('previewBox').classList.add('hidden');
+            document.getElementById('downloadBox').classList.add('hidden');
+            document.getElementById('commandBox').classList.add('hidden');
+            document.getElementById('messageBox').innerHTML = '';
+            updatedGameData = null;
+        }
+
+        // 显示消息
+        function showMessage(text, type) {
+            const className = type === 'success' ? 'success-message' : 'error-message';
+            document.getElementById('messageBox').innerHTML = `<div class="${className}">${text}</div>`;
+        }
+
+        // 批量添加
+        async function loadBatchGameData() {
+            const gameFile = document.getElementById('batchGameSelect').value;
+            // 可以在这里预加载游戏数据用于验证
+        }
+
+        function batchAddData() {
+            showMessage('批量添加功能开发中，敬请期待', 'error');
+        }
+
+        function loadBatchTemplate() {
+            const template = {
+                "字段名1": "单个值",
+                "字段名2": ["值1", "值2", "值3"],
+                "字段名3": ["可以一次添加多个值"]
+            };
+            document.getElementById('batchData').value = JSON.stringify(template, null, 2);
+        }
+
+        // 初始化
+        window.onload = loadGamesList;
+    </script>
+</body>
+</html>
