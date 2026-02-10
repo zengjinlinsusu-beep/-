@@ -714,6 +714,8 @@
             if (checkLoginStatus()) {
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
+                // 加载游戏列表
+                loadGamesList();
             }
         });
 
