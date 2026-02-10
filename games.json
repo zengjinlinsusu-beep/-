@@ -25,11 +25,6 @@
     "icon": "🏎️"
   },
   {
-    "name": "updates",
-    "file": "updates.json",
-    "icon": "🎮"
-  },
-  {
     "name": "三国杀",
     "file": "三国杀.json",
     "icon": "🎮"
