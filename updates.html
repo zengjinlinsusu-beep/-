@@ -173,10 +173,13 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
+            word-break: break-word;
+            max-width: 100%;
         }
 
         .update-tag-key {
             font-weight: bold;
+            flex-shrink: 0;
         }
 
         .no-updates {
@@ -371,12 +374,18 @@
             }
 
             const html = updates.map(update => {
-                const updateItems = Object.entries(update.updates).map(([key, value]) => `
-                    <div class="update-tag">
-                        <span class="update-tag-key">${key}:</span>
-                        <span>${value}</span>
-                    </div>
-                `).join('');
+                const updateItems = Object.entries(update.updates).map(([key, value]) => {
+                    // 如果是带编号的key（如"枪皮_1"），只显示值
+                    if (key.includes('_') && key.split('_').pop().match(/^\d+$/)) {
+                        return `<div class="update-tag">${value}</div>`;
+                    }
+                    return `
+                        <div class="update-tag">
+                            <span class="update-tag-key">${key}:</span>
+                            <span>${value}</span>
+                        </div>
+                    `;
+                }).join('');
 
                 return `
                     <div class="update-item">
